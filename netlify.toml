@@ -1,0 +1,14 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# FORGED Resilience Lab — netlify.toml
+# Merge this block into your existing netlify.toml
+# ─────────────────────────────────────────────────────────────────────────────
+
+[build]
+  functions = "netlify/functions"
+
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
+
+# Scheduled function — fires daily at 05:00 UTC (07:00 WAT)
+[functions."forged-daily-nudge"]
+  schedule = "0 5 * * *"
