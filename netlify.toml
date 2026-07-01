@@ -1,6 +1,6 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# FORGED Resilience Lab — netlify.toml
-# Merge this block into your existing netlify.toml
+# FORGED Resilience Coaching Lab — netlify.toml
+# Full Path A deployment configuration
 # ─────────────────────────────────────────────────────────────────────────────
 
 [build]
@@ -9,6 +9,20 @@
 [[plugins]]
   package = "@netlify/plugin-functions-install-core"
 
-# Scheduled function — fires daily at 05:00 UTC (07:00 WAT)
+# Daily nudge — 07:00 WAT (05:00 UTC)
 [functions."forged-daily-nudge"]
   schedule = "0 5 * * *"
+
+# Day 20 re-assessment trigger — 07:00 WAT (05:00 UTC)
+[functions."forged-day20-reassess-trigger"]
+  schedule = "0 5 * * *"
+
+# Weekly org lead scanner — Monday 08:00 WAT (06:00 UTC)
+[functions."forged-org-leads"]
+  schedule = "0 6 * * 1"
+
+# Public dashboard serving — /dashboard/:slug
+[[redirects]]
+  from = "/dashboard/:slug"
+  to = "/.netlify/functions/forged-dashboard-view?slug=:slug"
+  status = 200
