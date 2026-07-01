@@ -23,7 +23,7 @@ const SUBSCRIBERS_TBL = "tblCKeMaj5p5Lwl0m";
 const NUDGE_LOG_TBL   = "tblwWnRJscLpOiYw2";
 // TODO: replace with real table ID after creating this table —
 // see SCHEMA-airtable-additions.txt section 2
-const JOURNAL_TBL     = "tblJournalEntriesPLACEHOLDER";
+const JOURNAL_TBL     = "tblHD5ZSXEOatYq4P";
 const PHONE_ID        = "1135778909625987";
 const CLAUDE_MODEL    = "claude-haiku-4-5-20251001";
 
