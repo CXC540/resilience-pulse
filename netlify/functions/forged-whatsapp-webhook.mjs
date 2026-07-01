@@ -26,8 +26,8 @@ const SUBSCRIBERS_TBL  = "tblCKeMaj5p5Lwl0m";
 
 // TODO: replace with real table IDs after creating these tables —
 // see SCHEMA-airtable-additions.txt sections 2 and 3
-const JOURNAL_TBL      = "tblJournalEntriesPLACEHOLDER";
-const REASSESS_TBL     = "tblReassessInProgressPLACEHOLDER";
+const JOURNAL_TBL      = "tblHD5ZSXEOatYq4P";
+const REASSESS_TBL     = "tblk5dCSz6FavXHIZ";
 
 const PHONE_ID         = "1135778909625987";
 
