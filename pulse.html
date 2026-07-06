@@ -1,1 +1,440 @@
-Add Resilience Pulse Snapshot survey form — FRI assessment entry point
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FORGED Resilience Pulse Snapshot — Free FRI Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --crimson:       #8B1A1A;
+    --crimson-light: #F5E8E8;
+    --navy:          #1C3557;
+    --navy-mid:      #264873;
+    --navy-light:    #E8EEF5;
+    --gold:          #B8860B;
+    --gold-light:    #FDF3DC;
+    --black:         #0D0D0D;
+    --charcoal:      #1A1A1A;
+    --mid:           #4A4A4A;
+    --muted:         #767676;
+    --border:        #E0E0E0;
+    --bg:            #F7F5F2;
+    --white:         #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); line-height: 1.6; }
+  .page { max-width: 720px; margin: 0 auto; background: var(--white); min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--charcoal); padding: 36px 48px 32px; position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--gold); }
+  .header-brand { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; margin-bottom: 20px; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 400; color: var(--white); line-height: 1.2; margin-bottom: 8px; }
+  .header-title em { font-style: italic; color: #C8A882; }
+  .header-sub { font-size: 13px; color: #9A9A9A; }
+
+  /* INTRO */
+  .intro { padding: 32px 48px; background: var(--navy-light); border-left: 4px solid var(--navy); }
+  .intro p { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--navy); line-height: 1.8; font-style: italic; text-align: justify; hyphens: auto; }
+  .intro-attr { margin-top: 12px; font-size: 12px; color: var(--navy-mid); font-family: 'DM Mono', monospace; letter-spacing: 0.06em; }
+
+  /* WHAT IS FRI */
+  .fri-explainer { padding: 24px 48px; border-bottom: 1px solid var(--border); display: flex; gap: 24px; align-items: flex-start; }
+  .fri-mark { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 600; color: var(--gold); letter-spacing: 0.1em; flex-shrink: 0; padding-top: 2px; }
+  .fri-text { font-size: 13px; color: var(--mid); line-height: 1.7; text-align: justify; hyphens: auto; }
+  .fri-text strong { color: var(--navy); font-weight: 600; }
+
+  /* FORM SECTIONS */
+  .form-section { padding: 32px 48px; border-bottom: 1px solid var(--border); }
+  .form-section:last-of-type { border-bottom: none; }
+  .form-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .form-field { margin-bottom: 20px; }
+  .form-field label { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+  .required-mark { color: var(--crimson); margin-left: 2px; }
+  .form-field input, .form-field select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal); background: var(--white); transition: border-color 0.2s; }
+  .form-field input:focus, .form-field select:focus { outline: none; border-color: var(--navy); }
+  .form-field input.error, .form-field select.error { border-color: var(--crimson); }
+  .field-note { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .transparency-note { font-size: 12px; color: var(--muted); line-height: 1.5; font-style: italic; margin-top: -8px; margin-bottom: 20px; padding: 10px 14px; background: var(--gold-light); border-radius: 4px; }
+
+  /* DIMENSION QUESTIONS */
+  .dimension-card { border: 1px solid var(--border); border-radius: 6px; padding: 20px 22px; margin-bottom: 14px; position: relative; overflow: hidden; transition: border-color 0.2s; }
+  .dimension-card:hover { border-color: var(--navy); }
+  .dimension-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--navy); }
+  .dimension-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 4px; }
+  .dimension-name { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+  .dimension-desc { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+  .scale-row { display: flex; gap: 8px; align-items: center; }
+  .scale-label { font-size: 11px; color: var(--muted); flex-shrink: 0; font-family: 'DM Mono', monospace; }
+  .scale-options { display: flex; gap: 8px; flex: 1; justify-content: center; }
+  .scale-option { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+  .scale-option input[type="radio"] { display: none; }
+  .scale-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+  .scale-option input[type="radio"]:checked + .scale-btn { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .scale-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .dimension-card.answered::before { background: var(--gold); }
+
+  /* PROGRESS */
+  .progress-bar { position: sticky; top: 0; z-index: 10; background: var(--white); padding: 12px 48px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+  .progress-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.3s ease; }
+  .progress-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); flex-shrink: 0; }
+
+  /* SUBMIT */
+  .submit-section { padding: 32px 48px 40px; }
+  .submit-btn { width: 100%; background: var(--crimson); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; padding: 16px; border: none; border-radius: 4px; cursor: pointer; letter-spacing: 0.04em; transition: background 0.2s; }
+  .submit-btn:hover { background: #7A1515; }
+  .submit-btn:disabled { background: var(--muted); cursor: not-allowed; }
+  .submit-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.5; }
+
+  /* ERROR / SUCCESS STATES */
+  .error-banner { background: var(--crimson-light); border: 1px solid #D4A0A0; border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--crimson); display: none; }
+  .error-banner.visible { display: block; }
+  .success-screen { display: none; padding: 60px 48px; text-align: center; }
+  .success-screen.visible { display: block; }
+  .success-icon { font-size: 48px; margin-bottom: 20px; }
+  .success-title { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); margin-bottom: 12px; }
+  .success-body { font-size: 14px; color: var(--mid); line-height: 1.7; max-width: 440px; margin: 0 auto 24px; }
+  .success-note { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
+
+  /* FOOTER */
+  .footer { background: var(--black); padding: 20px 48px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+  .footer-brand { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: 0.1em; }
+  .footer-tagline { font-family: 'Playfair Display', serif; font-size: 11px; font-style: italic; color: var(--gold); }
+  .footer-legal { font-size: 10px; color: var(--white); font-family: 'DM Mono', monospace; }
+
+  /* LOADING */
+  .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
+  .loading-overlay.visible { display: flex; }
+  .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--navy); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  .loading-text { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--navy); letter-spacing: 0.08em; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 640px) {
+    .header, .intro, .fri-explainer, .form-section, .submit-section, .footer { padding-left: 24px; padding-right: 24px; }
+    .progress-bar { padding-left: 24px; padding-right: 24px; }
+    .fri-explainer { flex-direction: column; gap: 10px; }
+    .scale-btn { width: 34px; height: 34px; font-size: 14px; }
+    .header-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Generating your Resilience Pulse Snapshot...</div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-brand">FORGED &nbsp;·&nbsp; Resilience Coaching Lab</div>
+    <h1 class="header-title">Resilience <em>Pulse Snapshot</em></h1>
+    <p class="header-sub">FORGED Resilience Index (FRI) &nbsp;·&nbsp; 7 Dimensions &nbsp;·&nbsp; Free &nbsp;·&nbsp; Confidential</p>
+  </div>
+
+  <!-- INTRO -->
+  <div class="intro">
+    <p>"Pressure does not create who you are. It reveals what is already inside you. This assessment is not a verdict — it is a mirror. What you see here is your starting point, your foundation strength, and the frontier where your greatest leadership growth lives."</p>
+    <div class="intro-attr">— Coach Orange &nbsp;·&nbsp; FORGED Resilience Coaching Lab</div>
+  </div>
+
+  <!-- FRI EXPLAINER -->
+  <div class="fri-explainer">
+    <div class="fri-mark">WHAT IS<br>THE FRI?</div>
+    <div class="fri-text">The <strong>FORGED Resilience Index (FRI)</strong> is the proprietary diagnostic instrument of the Resilience Coaching Lab — developed by Jacob Ntintin Orange, grounded in 23 years of talent, leadership and organisational development practice across African institutions. It measures 7 distinct dimensions of how leaders respond under pressure and produces a single, comparable score for each. It is not a personality test and it does not diagnose. It reveals patterns — so you can choose, deliberately, what to strengthen next.</div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 7 answered</div>
+  </div>
+
+  <!-- FORM -->
+  <form id="pulseForm" novalidate>
+
+    <!-- PERSONAL DETAILS -->
+    <div class="form-section">
+      <div class="form-eyebrow">Your Details</div>
+
+      <div class="form-field">
+        <label for="full_name">Full Name <span class="required-mark">*</span></label>
+        <input type="text" id="full_name" name="full_name" required placeholder="e.g. Amara Diallo" autocomplete="name" />
+      </div>
+
+      <div class="form-field">
+        <label for="whatsapp">WhatsApp Number <span class="required-mark">*</span></label>
+        <input type="tel" id="whatsapp" name="whatsapp" required placeholder="e.g. +264 81 222 1111" autocomplete="tel" />
+        <div class="field-note">Your personalised report will be sent to this number via WhatsApp.</div>
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email Address <span class="required-mark">*</span></label>
+        <input type="email" id="email" name="email" required placeholder="e.g. amara@organisation.com" autocomplete="email" />
+      </div>
+
+      <div class="form-field">
+        <label for="job_title">Job Title <span class="required-mark">*</span></label>
+        <input type="text" id="job_title" name="job_title" required placeholder="e.g. Head of Operations" />
+      </div>
+
+      <div class="form-field">
+        <label for="organisation">Organisation <span class="required-mark">*</span></label>
+        <input type="text" id="organisation" name="organisation" required placeholder="e.g. NAMPORT" />
+      </div>
+
+      <div class="transparency-note">Your title and organisation help us tailor your Resilience Pulse Snapshot and, where relevant, explore how FORGED could support your wider team.</div>
+    </div>
+
+    <!-- THE 7 DIMENSIONS -->
+    <div class="form-section">
+      <div class="form-eyebrow">The 7 FRI Dimensions — Rate Yourself Honestly</div>
+
+      <p style="font-size:13px;color:var(--mid);margin-bottom:20px;line-height:1.6;">For each dimension, rate yourself on a scale of <strong>1 to 5</strong> — where <strong>1 is low</strong> and <strong>5 is strong</strong>. There are no right or wrong answers. Rate yourself as you are today, not as you aspire to be.</p>
+
+      <!-- D1 -->
+      <div class="dimension-card" id="card_d1">
+        <div class="dimension-num">DIMENSION 01 OF 07</div>
+        <div class="dimension-name">Emotional Regulation</div>
+        <div class="dimension-desc">Managing emotional responses under pressure — staying grounded when feelings are intense, maintaining perspective when circumstances are difficult.</div>
+        <div class="scale-row">
+          <div class="scale-label">Low</div>
+          <div class="scale-options">
+            <label class="scale-option"><input type="radio" name="d1" value="1" onchange="updateProgress()"><div class="scale-btn">1</div></label>
+            <label class="scale-option"><input type="radio" name="d1" value="2" onchange="updateProgress()"><div class="scale-btn">2</div></label>
+            <label class="scale-option"><input type="radio" name="d1" value="3" onchange="updateProgress()"><div class="scale-btn">3</div></label>
+            <label class="scale-option"><input type="radio" name="d1" value="4" onchange="updateProgress()"><div class="scale-btn">4</div></label>
+            <label class="scale-option"><input type="radio" name="d1" value="5" onchange="updateProgress()"><div class="scale-btn">5</div></label>
+          </div>
+          <div class="scale-label">Strong</div>
+        </div>
+      </div>
+
+      <!-- D2 -->
+      <div class="dimension-card" id="card_d2">
+        <div class="dimension-num">DIMENSION 02 OF 07</div>
+        <div class="dimension-name">Cognitive Flexibility</div>
+        <div class="dimension-desc">Shifting perspective and adapting thinking when circumstances change unexpectedly — letting go of fixed positions when new information demands it.</div>
+        <div class="scale-row">
+          <div class="scale-label">Low</div>
+          <div class="scale-options">
+            <label class="scale-option"><input type="radio" name="d2" value="1" onchange="updateProgress()"><div class="scale-btn">1</div></label>
+            <label class="scale-option"><input type="radio" name="d2" value="2" onchange="updateProgress()"><div class="scale-btn">2</div></label>
+            <label class="scale-option"><input type="radio" name="d2" value="3" onchange="updateProgress()"><div class="scale-btn">3</div></label>
+            <label class="scale-option"><input type="radio" name="d2" value="4" onchange="updateProgress()"><div class="scale-btn">4</div></label>
+            <label class="scale-option"><input type="radio" name="d2" value="5" onchange="updateProgress()"><div class="scale-btn">5</div></label>
+          </div>
+          <div class="scale-label">Strong</div>
+        </div>
+      </div>
+
+      <!-- D3 -->
+      <div class="dimension-card" id="card_d3">
+        <div class="dimension-num">DIMENSION 03 OF 07</div>
+        <div class="dimension-name">Social Support</div>
+        <div class="dimension-desc">Drawing strength from relationships and being willing to ask for and receive help — staying connected to your network when pressure tempts isolation.</div>
+        <div class="scale-row">
+          <div class="scale-label">Low</div>
+          <div class="scale-options">
+            <label class="scale-option"><input type="radio" name="d3" value="1" onchange="updateProgress()"><div class="scale-btn">1</div></label>
+            <label class="scale-option"><input type="radio" name="d3" value="2" onchange="updateProgress()"><div class="scale-btn">2</div></label>
+            <label class="scale-option"><input type="radio" name="d3" value="3" onchange="updateProgress()"><div class="scale-btn">3</div></label>
+            <label class="scale-option"><input type="radio" name="d3" value="4" onchange="updateProgress()"><div class="scale-btn">4</div></label>
+            <label class="scale-option"><input type="radio" name="d3" value="5" onchange="updateProgress()"><div class="scale-btn">5</div></label>
+          </div>
+          <div class="scale-label">Strong</div>
+        </div>
+      </div>
+
+      <!-- D4 -->
+      <div class="dimension-card" id="card_d4">
+        <div class="dimension-num">DIMENSION 04 OF 07</div>
+        <div class="dimension-name">Purpose &amp; Meaning</div>
+        <div class="dimension-desc">Staying connected to the deeper why behind your work — maintaining motivation and direction, especially in difficult or disillusioning seasons.</div>
+        <div class="scale-row">
+          <div class="scale-label">Low</div>
+          <div class="scale-options">
+            <label class="scale-option"><input type="radio" name="d4" value="1" onchange="updateProgress()"><div class="scale-btn">1</div></label>
+            <label class="scale-option"><input type="radio" name="d4" value="2" onchange="updateProgress()"><div class="scale-btn">2</div></label>
+            <label class="scale-option"><input type="radio" name="d4" value="3" onchange="updateProgress()"><div class="scale-btn">3</div></label>
+            <label class="scale-option"><input type="radio" name="d4" value="4" onchange="updateProgress()"><div class="scale-btn">4</div></label>
+            <label class="scale-option"><input type="radio" name="d4" value="5" onchange="updateProgress()"><div class="scale-btn">5</div></label>
+          </div>
+          <div class="scale-label">Strong</div>
+        </div>
+      </div>
+
+      <!-- D5 -->
+      <div class="dimension-card" id="card_d5">
+        <div class="dimension-num">DIMENSION 05 OF 07</div>
+        <div class="dimension-name">Physical Vitality</div>
+        <div class="dimension-desc">Sustaining physical energy, sleep, and body care as a leadership foundation — investing in the physical capacity that sustained performance demands.</div>
+        <div class="scale-row">
+          <div class="scale-label">Low</div>
+          <div class="scale-options">
+            <label class="scale-option"><input type="radio" name="d5" value="1" onchange="updateProgress()"><div class="scale-btn">1</div></label>
+            <label class="scale-option"><input type="radio" name="d5" value="2" onchange="updateProgress()"><div class="scale-btn">2</div></label>
+            <label class="scale-option"><input type="radio" name="d5" value="3" onchange="updateProgress()"><div class="scale-btn">3</div></label>
+            <label class="scale-option"><input type="radio" name="d5" value="4" onchange="updateProgress()"><div class="scale-btn">4</div></label>
+            <label class="scale-option"><input type="radio" name="d5" value="5" onchange="updateProgress()"><div class="scale-btn">5</div></label>
+          </div>
+          <div class="scale-label">Strong</div>
+        </div>
+      </div>
+
+      <!-- D6 -->
+      <div class="dimension-card" id="card_d6">
+        <div class="dimension-num">DIMENSION 06 OF 07</div>
+        <div class="dimension-name">Adaptive Coping</div>
+        <div class="dimension-desc">Responding to setbacks with practical strategies rather than avoidance or rigidity — finding workable paths forward when circumstances resist your first approach.</div>
+        <div class="scale-row">
+          <div class="scale-label">Low</div>
+          <div class="scale-options">
+            <label class="scale-option"><input type="radio" name="d6" value="1" onchange="updateProgress()"><div class="scale-btn">1</div></label>
+            <label class="scale-option"><input type="radio" name="d6" value="2" onchange="updateProgress()"><div class="scale-btn">2</div></label>
+            <label class="scale-option"><input type="radio" name="d6" value="3" onchange="updateProgress()"><div class="scale-btn">3</div></label>
+            <label class="scale-option"><input type="radio" name="d6" value="4" onchange="updateProgress()"><div class="scale-btn">4</div></label>
+            <label class="scale-option"><input type="radio" name="d6" value="5" onchange="updateProgress()"><div class="scale-btn">5</div></label>
+          </div>
+          <div class="scale-label">Strong</div>
+        </div>
+      </div>
+
+      <!-- D7 -->
+      <div class="dimension-card" id="card_d7">
+        <div class="dimension-num">DIMENSION 07 OF 07</div>
+        <div class="dimension-name">Identity Stability</div>
+        <div class="dimension-desc">Remaining grounded in who you are when roles, expectations, or environments shift — knowing your own values and character independently of performance or position.</div>
+        <div class="scale-row">
+          <div class="scale-label">Low</div>
+          <div class="scale-options">
+            <label class="scale-option"><input type="radio" name="d7" value="1" onchange="updateProgress()"><div class="scale-btn">1</div></label>
+            <label class="scale-option"><input type="radio" name="d7" value="2" onchange="updateProgress()"><div class="scale-btn">2</div></label>
+            <label class="scale-option"><input type="radio" name="d7" value="3" onchange="updateProgress()"><div class="scale-btn">3</div></label>
+            <label class="scale-option"><input type="radio" name="d7" value="4" onchange="updateProgress()"><div class="scale-btn">4</div></label>
+            <label class="scale-option"><input type="radio" name="d7" value="5" onchange="updateProgress()"><div class="scale-btn">5</div></label>
+          </div>
+          <div class="scale-label">Strong</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-section">
+      <div class="error-banner" id="errorBanner">Please complete all fields and rate all 7 dimensions before submitting.</div>
+      <button type="submit" class="submit-btn" id="submitBtn">Generate My Resilience Pulse Snapshot →</button>
+      <p class="submit-note">Your personalised report will be sent to your WhatsApp number within minutes. &nbsp;·&nbsp; Free &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; Aligned to ICF coaching ethics.</p>
+    </div>
+
+  </form>
+
+  <!-- SUCCESS SCREEN -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">🔥</div>
+    <h2 class="success-title">Your Resilience Pulse Snapshot is on its way.</h2>
+    <p class="success-body">Your personalised seven-dimension FRI report is being generated and will arrive on your WhatsApp number within the next few minutes. Check your WhatsApp for a message from FORGED Resilience Coach.</p>
+    <div class="success-note">FORGED &nbsp;·&nbsp; Resilience Coaching Lab &nbsp;·&nbsp; Confidential</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-brand">FORGED &nbsp;/&nbsp; Resilience Coaching Lab</div>
+    <div class="footer-tagline">Resilient leaders are not created. They are forged.</div>
+    <div class="footer-legal">Confidential &nbsp;·&nbsp; Aligned to ICF Coaching Ethics &nbsp;·&nbsp; Change Experience Consulting (CXC) &nbsp;·&nbsp; CC/2008/1668</div>
+  </div>
+
+</div>
+
+<script>
+const DIMENSIONS = ['d1','d2','d3','d4','d5','d6','d7'];
+
+function updateProgress() {
+  const answered = DIMENSIONS.filter(d => document.querySelector(`input[name="${d}"]:checked`)).length;
+  const pct = Math.round((answered / 7) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${answered} of 7 answered`;
+  DIMENSIONS.forEach(d => {
+    const card = document.getElementById(`card_${d}`);
+    if (document.querySelector(`input[name="${d}"]:checked`)) {
+      card.classList.add('answered');
+    }
+  });
+}
+
+function validateForm() {
+  let valid = true;
+  const required = ['full_name','whatsapp','email','job_title','organisation'];
+  required.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.classList.add('error'); valid = false; }
+    else el.classList.remove('error');
+  });
+  const allAnswered = DIMENSIONS.every(d => document.querySelector(`input[name="${d}"]:checked`));
+  if (!allAnswered) valid = false;
+  return valid;
+}
+
+document.getElementById('pulseForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const errorBanner = document.getElementById('errorBanner');
+
+  if (!validateForm()) {
+    errorBanner.classList.add('visible');
+    errorBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  errorBanner.classList.remove('visible');
+  document.getElementById('loadingOverlay').classList.add('visible');
+  document.getElementById('submitBtn').disabled = true;
+
+  const scores = {};
+  DIMENSIONS.forEach((d, i) => {
+    const dimNames = ['Emotional Regulation','Cognitive Flexibility','Social Support','Purpose & Meaning','Physical Vitality','Adaptive Coping','Identity Stability'];
+    scores[dimNames[i]] = parseInt(document.querySelector(`input[name="${d}"]:checked`).value);
+  });
+
+  const payload = {
+    full_name:    document.getElementById('full_name').value.trim(),
+    whatsapp:     document.getElementById('whatsapp').value.trim(),
+    email:        document.getElementById('email').value.trim(),
+    job_title:    document.getElementById('job_title').value.trim(),
+    organisation: document.getElementById('organisation').value.trim(),
+    scores
+  };
+
+  try {
+    const res = await fetch('/.netlify/functions/score-and-generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      document.getElementById('pulseForm').style.display = 'none';
+      document.getElementById('progressBar').style.display = 'none';
+      document.getElementById('successScreen').classList.add('visible');
+    } else {
+      throw new Error('Submission failed');
+    }
+  } catch (err) {
+    errorBanner.textContent = 'Something went wrong submitting your assessment. Please try again or contact resilience.cxc@gmail.com.';
+    errorBanner.classList.add('visible');
+    document.getElementById('submitBtn').disabled = false;
+  } finally {
+    document.getElementById('loadingOverlay').classList.remove('visible');
+  }
+});
+
+// Remove error state on input
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', () => el.classList.remove('error'));
+});
+</script>
+</body>
+</html>
