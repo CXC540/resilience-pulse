@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FORGED — Resilience Forge Lab · Express Interest</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --crimson: #8B1A1A; --crimson-light: #F5E8E8;
+    --navy: #1C3557; --navy-light: #E8EEF5;
+    --gold: #B8860B; --gold-light: #FDF3DC;
+    --charcoal: #1A1A1A; --mid: #4A4A4A; --muted: #767676;
+    --border: #E0E0E0; --bg: #F7F5F2; --white: #FFFFFF; --black: #0D0D0D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); line-height: 1.6; }
+  .page { max-width: 680px; margin: 0 auto; background: var(--white); min-height: 100vh; }
+
+  .header { background: var(--black); padding: 40px 48px 36px; position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--gold); }
+  .header-brand { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; margin-bottom: 18px; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 400; color: var(--white); line-height: 1.2; margin-bottom: 8px; }
+  .header-title em { font-style: italic; color: #C8A882; }
+  .header-sub { font-size: 13px; color: #9A9A9A; }
+
+  .context { padding: 28px 48px; background: var(--navy-light); border-left: 4px solid var(--navy); }
+  .context p { font-family: 'Playfair Display', serif; font-size: 15px; font-style: italic; color: var(--navy); line-height: 1.8; text-align: justify; hyphens: auto; }
+
+  .tier-strip { padding: 24px 48px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .tier-item { text-align: center; padding: 16px 10px; background: var(--bg); border-radius: 6px; }
+  .tier-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .tier-value { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--navy); font-weight: 600; display: block; }
+  .tier-note { font-size: 10px; color: var(--muted); margin-top: 3px; display: block; }
+
+  .form-section { padding: 32px 48px; border-bottom: 1px solid var(--border); }
+  .form-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .form-field { margin-bottom: 18px; }
+  .form-field label { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+  .req { color: var(--crimson); margin-left: 2px; }
+  .form-field input, .form-field select, .form-field textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal); background: var(--white); transition: border-color 0.2s; }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: var(--navy); }
+  .form-field input.error, .form-field select.error { border-color: var(--crimson); }
+  .form-field textarea { resize: vertical; min-height: 80px; }
+  .field-note { font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .submit-section { padding: 28px 48px 40px; }
+  .submit-btn { width: 100%; background: var(--crimson); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; padding: 15px; border: none; border-radius: 4px; cursor: pointer; letter-spacing: 0.04em; transition: background 0.2s; }
+  .submit-btn:hover { background: #7A1515; }
+  .submit-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; line-height: 1.5; }
+  .error-banner { background: var(--crimson-light); border: 1px solid #D4A0A0; border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--crimson); display: none; }
+  .error-banner.visible { display: block; }
+
+  .success-screen { display: none; padding: 60px 48px; text-align: center; }
+  .success-screen.visible { display: block; }
+  .success-icon { font-size: 48px; margin-bottom: 20px; }
+  .success-title { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--navy); margin-bottom: 12px; }
+  .success-body { font-size: 14px; color: var(--mid); line-height: 1.7; max-width: 420px; margin: 0 auto 20px; }
+  .success-note { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+
+  .footer { background: var(--black); padding: 20px 48px; text-align: center; }
+  .footer-brand { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: 0.1em; }
+  .footer-tagline { font-family: 'Playfair Display', serif; font-size: 11px; font-style: italic; color: var(--gold); margin-top: 4px; }
+
+  .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
+  .loading-overlay.visible { display: flex; }
+  .loading-spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--navy); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 14px; }
+  .loading-text { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--navy); letter-spacing: 0.08em; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 600px) {
+    .header, .context, .tier-strip, .form-section, .submit-section, .footer, .success-screen { padding-left: 24px; padding-right: 24px; }
+    .tier-strip { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Registering your interest...</div>
+  </div>
+
+  <div class="header">
+    <div class="header-brand">FORGED &nbsp;·&nbsp; Resilience Coaching Lab</div>
+    <h1 class="header-title">Resilience <em>Forge Lab</em></h1>
+    <p class="header-sub">6-Month Transformative Coaching &nbsp;·&nbsp; By Invitation &nbsp;·&nbsp; Limited Cohort Places</p>
+  </div>
+
+  <div class="context">
+    <p>"21 days of momentum is the beginning. The Forge Lab is where the real excavation shapes lasting change. This is where the leader who showed up under pressure becomes the leader who chooses who they are becoming — deliberately, with precision, and with sustained support."</p>
+  </div>
+
+  <div class="tier-strip">
+    <div class="tier-item">
+      <span class="tier-label">Duration</span>
+      <span class="tier-value">6 Months</span>
+      <span class="tier-note">Structured transformation</span>
+    </div>
+    <div class="tier-item">
+      <span class="tier-label">Cohort Size</span>
+      <span class="tier-value">6–12</span>
+      <span class="tier-note">Leaders per cohort</span>
+    </div>
+    <div class="tier-item">
+      <span class="tier-label">Investment</span>
+      <span class="tier-value">From N$7,950</span>
+      <span class="tier-note">Per leader · cohort pricing</span>
+    </div>
+  </div>
+
+  <form id="forgeLabForm" name="forge-lab-interest" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" novalidate>
+    <input type="hidden" name="form-name" value="forge-lab-interest" />
+    <input type="hidden" name="bot-field" style="display:none" />
+
+    <div class="form-section">
+      <div class="form-eyebrow">Your Details</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="full_name">Full Name <span class="req">*</span></label>
+          <input type="text" id="full_name" name="full_name" required placeholder="Your full name" />
+        </div>
+        <div class="form-field">
+          <label for="whatsapp">WhatsApp Number <span class="req">*</span></label>
+          <input type="tel" id="whatsapp" name="whatsapp" required placeholder="+264 81 000 0000" />
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="email">Email Address <span class="req">*</span></label>
+        <input type="email" id="email" name="email" required placeholder="your@email.com" />
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="job_title">Job Title <span class="req">*</span></label>
+          <input type="text" id="job_title" name="job_title" required placeholder="e.g. Head of Operations" />
+        </div>
+        <div class="form-field">
+          <label for="organisation">Organisation <span class="req">*</span></label>
+          <input type="text" id="organisation" name="organisation" required placeholder="e.g. NAMPORT" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-eyebrow">Your Forge Lab Context</div>
+      <div class="form-field">
+        <label for="fri_score">Your FRI Score (if known)</label>
+        <input type="text" id="fri_score" name="fri_score" placeholder="e.g. 68/100 — Developing Resilience" />
+        <div class="field-note">If you have completed the Resilience Pulse Snapshot, include your score. Leave blank if not yet completed.</div>
+      </div>
+      <div class="form-field">
+        <label for="primary_dimension">Primary Growth Dimension (if known)</label>
+        <select id="primary_dimension" name="primary_dimension">
+          <option value="">Select dimension (optional)</option>
+          <option>Emotional Regulation</option>
+          <option>Cognitive Flexibility</option>
+          <option>Social Support</option>
+          <option>Purpose &amp; Meaning</option>
+          <option>Physical Vitality</option>
+          <option>Adaptive Coping</option>
+          <option>Identity Stability</option>
+          <option>Not yet assessed</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="motivation">What is bringing you to the Forge Lab?</label>
+        <textarea id="motivation" name="motivation" placeholder="Briefly describe the leadership challenge or pressure context that is motivating your interest in the Forge Lab..."></textarea>
+        <div class="field-note">Optional — but your response helps Coach Orange prepare a relevant intake conversation.</div>
+      </div>
+      <div class="form-field">
+        <label for="preferred_start">Preferred Start Window</label>
+        <select id="preferred_start" name="preferred_start">
+          <option value="">Select preferred window</option>
+          <option>As soon as a cohort opens</option>
+          <option>Q3 2026 (July–September)</option>
+          <option>Q4 2026 (October–December)</option>
+          <option>Q1 2027 (January–March)</option>
+          <option>Flexible — no preference</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="submit-section">
+      <div class="error-banner" id="errorBanner">Please complete all required fields before submitting.</div>
+      <button type="submit" class="submit-btn" id="submitBtn">Register My Interest in the Forge Lab →</button>
+      <p class="submit-note">No commitment required. Coach Orange will contact you within 48 hours to discuss your Forge Lab intake. &nbsp;·&nbsp; ICF-aligned confidentiality applies from this point.</p>
+    </div>
+  </form>
+
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">🔥</div>
+    <h2 class="success-title">Your interest is registered.</h2>
+    <p class="success-body">Coach Orange will be in contact within 48 hours via WhatsApp to discuss your Forge Lab intake conversation. The excavation begins with one honest conversation.</p>
+    <div class="success-note">FORGED &nbsp;·&nbsp; Resilience Coaching Lab &nbsp;·&nbsp; Confidential</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-brand">FORGED &nbsp;/&nbsp; Resilience Coaching Lab</div>
+    <div class="footer-tagline">Resilient leaders are not created. They are forged.</div>
+  </div>
+</div>
+
+<script>
+function validateForm() {
+  const required = ['full_name','whatsapp','email','job_title','organisation'];
+  let valid = true;
+  required.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.classList.add('error'); valid = false; }
+    else el.classList.remove('error');
+  });
+  return valid;
+}
+
+document.getElementById('forgeLabForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!validateForm()) {
+    const banner = document.getElementById('errorBanner');
+    banner.classList.add('visible');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  document.getElementById('errorBanner').classList.remove('visible');
+  document.getElementById('loadingOverlay').classList.add('visible');
+  document.getElementById('submitBtn').disabled = true;
+
+  const formData = new FormData(this);
+  try {
+    const res = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(formData).toString() });
+    if (res.ok) {
+      document.getElementById('forgeLabForm').style.display = 'none';
+      document.getElementById('successScreen').classList.add('visible');
+    } else { throw new Error('Submission failed'); }
+  } catch(err) {
+    document.getElementById('errorBanner').textContent = 'Something went wrong. Please try again or contact resilience.cxc@gmail.com.';
+    document.getElementById('errorBanner').classList.add('visible');
+    document.getElementById('submitBtn').disabled = false;
+  } finally {
+    document.getElementById('loadingOverlay').classList.remove('visible');
+  }
+});
+document.querySelectorAll('input, select, textarea').forEach(el => el.addEventListener('input', () => el.classList.remove('error')));
+</script>
+</body>
+</html>
