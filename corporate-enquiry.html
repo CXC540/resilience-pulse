@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FORGED — Corporate Resilience Enquiry</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --crimson: #8B1A1A; --crimson-light: #F5E8E8;
+    --navy: #1C3557; --navy-light: #E8EEF5; --navy-mid: #264873;
+    --gold: #B8860B; --gold-light: #FDF3DC;
+    --charcoal: #1A1A1A; --mid: #4A4A4A; --muted: #767676;
+    --border: #E0E0E0; --bg: #F7F5F2; --white: #FFFFFF; --black: #0D0D0D;
+    --green: #1A6B3C; --green-bg: #E8F5EE;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); line-height: 1.6; }
+  .page { max-width: 720px; margin: 0 auto; background: var(--white); min-height: 100vh; }
+
+  .header { background: var(--navy); padding: 40px 56px 36px; position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: var(--gold); }
+  .header-brand { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase; margin-bottom: 18px; }
+  .header-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 400; color: var(--white); line-height: 1.2; margin-bottom: 8px; }
+  .header-title em { font-style: italic; color: #C8A882; }
+  .header-sub { font-size: 13px; color: #9BB5D4; }
+
+  .value-strip { padding: 28px 56px; background: var(--gold-light); border-bottom: 1px solid var(--border); }
+  .value-strip p { font-family: 'Playfair Display', serif; font-size: 15px; font-style: italic; color: var(--navy-mid); line-height: 1.8; text-align: justify; hyphens: auto; }
+
+  .tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 24px 56px; border-bottom: 1px solid var(--border); }
+  .tier-card { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .tier-header { padding: 14px 16px; }
+  .tier-card:nth-child(1) .tier-header { background: var(--navy-light); }
+  .tier-card:nth-child(2) .tier-header { background: var(--gold-light); }
+  .tier-card:nth-child(3) .tier-header { background: var(--crimson-light); }
+  .tier-eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .tier-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .tier-price { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--crimson); font-weight: 600; padding: 10px 16px; }
+
+  .form-section { padding: 28px 56px; border-bottom: 1px solid var(--border); }
+  .form-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .form-field { margin-bottom: 16px; }
+  .form-field label { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 5px; }
+  .req { color: var(--crimson); margin-left: 2px; }
+  .form-field input, .form-field select, .form-field textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal); background: var(--white); transition: border-color 0.2s; }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: var(--navy); }
+  .form-field input.error, .form-field select.error { border-color: var(--crimson); }
+  .form-field textarea { resize: vertical; min-height: 80px; }
+  .form-field .field-note { font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .pilot-panel { background: var(--navy); border-radius: 8px; padding: 24px 28px; margin: 0 56px 24px; }
+  .pilot-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; }
+  .pilot-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--white); margin-bottom: 8px; }
+  .pilot-body { font-size: 13px; color: #9BB5D4; line-height: 1.6; }
+  .pilot-price { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold); margin-top: 12px; font-weight: 600; }
+  .pilot-note { font-size: 11px; color: #6A8AA4; margin-top: 3px; }
+
+  .submit-section { padding: 24px 56px 40px; }
+  .submit-btn { width: 100%; background: var(--crimson); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; padding: 15px; border: none; border-radius: 4px; cursor: pointer; letter-spacing: 0.04em; transition: background 0.2s; }
+  .submit-btn:hover { background: #7A1515; }
+  .submit-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; line-height: 1.5; }
+  .error-banner { background: var(--crimson-light); border: 1px solid #D4A0A0; border-radius: 4px; padding: 12px 16px; margin-bottom: 14px; font-size: 13px; color: var(--crimson); display: none; }
+  .error-banner.visible { display: block; }
+
+  .success-screen { display: none; padding: 60px 56px; text-align: center; }
+  .success-screen.visible { display: block; }
+  .success-icon { font-size: 48px; margin-bottom: 18px; }
+  .success-title { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--navy); margin-bottom: 12px; }
+  .success-body { font-size: 14px; color: var(--mid); line-height: 1.7; max-width: 440px; margin: 0 auto 20px; }
+  .success-note { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+
+  .footer { background: var(--black); padding: 20px 56px; text-align: center; }
+  .footer-brand { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: 0.1em; }
+  .footer-tagline { font-family: 'Playfair Display', serif; font-size: 11px; font-style: italic; color: var(--gold); margin-top: 4px; }
+  .footer-legal { font-size: 10px; color: #555; font-family: 'DM Mono', monospace; margin-top: 4px; }
+
+  .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
+  .loading-overlay.visible { display: flex; }
+  .loading-spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--navy); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 14px; }
+  .loading-text { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--navy); letter-spacing: 0.08em; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 640px) {
+    .header, .value-strip, .tier-grid, .form-section, .pilot-panel, .submit-section, .footer, .success-screen { padding-left: 24px; padding-right: 24px; }
+    .tier-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .pilot-panel { margin-left: 24px; margin-right: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Submitting your enquiry...</div>
+  </div>
+
+  <div class="header">
+    <div class="header-brand">FORGED &nbsp;·&nbsp; Resilience Coaching Lab &nbsp;·&nbsp; Corporate Enquiry</div>
+    <h1 class="header-title">Resilience Coaching for <em>Your Leadership Cohort</em></h1>
+    <p class="header-sub">Change Experience Consulting (CXC) &nbsp;·&nbsp; CC/2008/1668 &nbsp;·&nbsp; 23 Years of Practice Across Africa</p>
+  </div>
+
+  <div class="value-strip">
+    <p>"Where conventional instruments tell organisations how their leaders are performing, the FORGED Resilience Index tells leaders — with precision — who they are becoming under the pressure their organisations create."</p>
+  </div>
+
+  <div class="tier-grid">
+    <div class="tier-card">
+      <div class="tier-header"><span class="tier-eyebrow">Tier 1</span><div class="tier-name">Resilience Pulse Snapshot</div></div>
+      <div class="tier-price">Free</div>
+    </div>
+    <div class="tier-card">
+      <div class="tier-header"><span class="tier-eyebrow">Tier 2</span><div class="tier-name">Resilience Launchpad</div></div>
+      <div class="tier-price">From N$1,200/token</div>
+    </div>
+    <div class="tier-card">
+      <div class="tier-header"><span class="tier-eyebrow">Tier 3</span><div class="tier-name">Resilience Forge Lab</div></div>
+      <div class="tier-price">From N$7,950/leader</div>
+    </div>
+  </div>
+
+  <form id="corporateForm" name="corporate-enquiry" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" novalidate>
+    <input type="hidden" name="form-name" value="corporate-enquiry" />
+    <input type="hidden" name="bot-field" style="display:none" />
+
+    <div class="form-section">
+      <div class="form-eyebrow">Organisation Details</div>
+      <div class="form-field">
+        <label for="organisation">Organisation Name <span class="req">*</span></label>
+        <input type="text" id="organisation" name="organisation" required placeholder="e.g. Development Bank of Namibia" />
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="sector">Sector <span class="req">*</span></label>
+          <select id="sector" name="sector" required>
+            <option value="">Select sector</option>
+            <option>Financial Services</option>
+            <option>State-Owned Enterprise</option>
+            <option>Development Finance</option>
+            <option>Mining &amp; Resources</option>
+            <option>Energy &amp; Utilities</option>
+            <option>Agriculture</option>
+            <option>Logistics &amp; Transport</option>
+            <option>Healthcare</option>
+            <option>Education</option>
+            <option>Government / Public Sector</option>
+            <option>Private Sector — Other</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="country">Country <span class="req">*</span></label>
+          <select id="country" name="country" required>
+            <option value="">Select country</option>
+            <option>Namibia</option>
+            <option>South Africa</option>
+            <option>Botswana</option>
+            <option>Zambia</option>
+            <option>Zimbabwe</option>
+            <option>Angola</option>
+            <option>Mozambique</option>
+            <option>Tanzania</option>
+            <option>Kenya</option>
+            <option>Nigeria</option>
+            <option>Ghana</option>
+            <option>Other African country</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="leaders_count">Number of Leaders for Deployment <span class="req">*</span></label>
+          <select id="leaders_count" name="leaders_count" required>
+            <option value="">Select range</option>
+            <option>1–10 leaders</option>
+            <option>11–24 leaders (Standard rate)</option>
+            <option>25–49 leaders (Mid-volume rate)</option>
+            <option>50+ leaders (Partnership rate)</option>
+            <option>Not yet determined</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="tier_interest">Tier of Interest <span class="req">*</span></label>
+          <select id="tier_interest" name="tier_interest" required>
+            <option value="">Select tier</option>
+            <option>Tier 1 — Free Pulse Snapshot only</option>
+            <option>Tier 1 + Tier 2 — Snapshot + Launchpad</option>
+            <option>Tier 2 — Launchpad only</option>
+            <option>Tier 3 — Forge Lab</option>
+            <option>Full three-tier deployment</option>
+            <option>Exploring options — not yet decided</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-eyebrow">Contact Details</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="contact_name">Your Full Name <span class="req">*</span></label>
+          <input type="text" id="contact_name" name="contact_name" required placeholder="Your name" />
+        </div>
+        <div class="form-field">
+          <label for="contact_title">Your Title <span class="req">*</span></label>
+          <input type="text" id="contact_title" name="contact_title" required placeholder="e.g. HR Director" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="email">Email Address <span class="req">*</span></label>
+          <input type="email" id="email" name="email" required placeholder="your@organisation.com" />
+        </div>
+        <div class="form-field">
+          <label for="whatsapp">WhatsApp Number <span class="req">*</span></label>
+          <input type="tel" id="whatsapp" name="whatsapp" required placeholder="+264 81 000 0000" />
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="context">What is driving this enquiry?</label>
+        <textarea id="context" name="context" placeholder="Briefly describe the leadership or resilience challenge your organisation is navigating..."></textarea>
+        <div class="field-note">Optional — your response helps Coach Orange tailor the proposal conversation to your specific organisational context.</div>
+      </div>
+      <div class="form-field">
+        <label for="timeline">Preferred Deployment Timeline</label>
+        <select id="timeline" name="timeline">
+          <option value="">Select timeline</option>
+          <option>Within 30 days</option>
+          <option>Q3 2026 (July–September)</option>
+          <option>Q4 2026 (October–December)</option>
+          <option>Q1 2027 (January–March)</option>
+          <option>Flexible — no urgency</option>
+        </select>
+      </div>
+    </div>
+  </form>
+
+  <div class="pilot-panel">
+    <div class="pilot-eyebrow">Recommended Starting Point</div>
+    <div class="pilot-title">Free Cohort Diagnostic — No Commitment Required</div>
+    <p class="pilot-body">Deploy the Resilience Pulse Snapshot across your leadership team at no cost. Your organisation receives an aggregate FRI cohort dashboard within 24 hours — revealing where collective resilience is strongest and where the greatest development need sits.</p>
+    <div class="pilot-price">N$0</div>
+    <div class="pilot-note">Unlimited leaders · Individual reports included · Cohort dashboard included</div>
+  </div>
+
+  <div class="submit-section">
+    <div class="error-banner" id="errorBanner">Please complete all required fields before submitting.</div>
+    <button type="submit" form="corporateForm" class="submit-btn" id="submitBtn">Submit Corporate Enquiry →</button>
+    <p class="submit-note">Coach Orange will respond within one business day. All enquiry data is held in strict confidence — aligned to ICF coaching ethics. &nbsp;·&nbsp; Change Experience Consulting (CXC) &nbsp;·&nbsp; CC/2008/1668</p>
+  </div>
+
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">📊</div>
+    <h2 class="success-title">Your enquiry has been received.</h2>
+    <p class="success-body">Coach Orange will be in contact within one business day via your preferred channel to discuss your organisation's resilience coaching requirements and recommend the most appropriate deployment architecture.</p>
+    <div class="success-note">FORGED &nbsp;·&nbsp; Resilience Coaching Lab &nbsp;·&nbsp; Change Experience Consulting &nbsp;·&nbsp; Confidential</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-brand">FORGED &nbsp;/&nbsp; Resilience Coaching Lab</div>
+    <div class="footer-tagline">Resilient leaders are not created. They are forged.</div>
+    <div class="footer-legal">Change Experience Consulting (CXC) &nbsp;·&nbsp; CC/2008/1668 &nbsp;·&nbsp; VAT 046389891-011 &nbsp;·&nbsp; Walvis Bay, Namibia</div>
+  </div>
+</div>
+
+<script>
+function validateForm() {
+  const required = ['organisation','sector','country','leaders_count','tier_interest','contact_name','contact_title','email','whatsapp'];
+  let valid = true;
+  required.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.classList.add('error'); valid = false; }
+    else el.classList.remove('error');
+  });
+  return valid;
+}
+
+document.getElementById('corporateForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!validateForm()) {
+    const banner = document.getElementById('errorBanner');
+    banner.classList.add('visible');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  document.getElementById('errorBanner').classList.remove('visible');
+  document.getElementById('loadingOverlay').classList.add('visible');
+  document.getElementById('submitBtn').disabled = true;
+
+  const formData = new FormData(this);
+  try {
+    const res = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(formData).toString() });
+    if (res.ok) {
+      document.getElementById('corporateForm').style.display = 'none';
+      document.getElementById('successScreen').classList.add('visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else { throw new Error('Submission failed'); }
+  } catch(err) {
+    document.getElementById('errorBanner').textContent = 'Something went wrong. Please try again or contact resilience.cxc@gmail.com.';
+    document.getElementById('errorBanner').classList.add('visible');
+    document.getElementById('submitBtn').disabled = false;
+  } finally {
+    document.getElementById('loadingOverlay').classList.remove('visible');
+  }
+});
+document.querySelectorAll('input, select, textarea').forEach(el => el.addEventListener('input', () => el.classList.remove('error')));
+</script>
+</body>
+</html>
