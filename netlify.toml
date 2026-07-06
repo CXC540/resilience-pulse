@@ -1,28 +1,104 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # FORGED Resilience Coaching Lab — netlify.toml
-# Full Path A deployment configuration
+# Change Experience Consulting (CXC) · CC/2008/1668
+# Deployed at: resilience-coaching.org
 # ─────────────────────────────────────────────────────────────────────────────
 
 [build]
-  functions = "netlify/functions"
+  publish = "."
+  command = ""
+
+# ── SCHEDULED FUNCTIONS ──────────────────────────────────────────────────────
 
 [[plugins]]
   package = "@netlify/plugin-functions-install-core"
 
-# Daily nudge — 07:00 WAT (05:00 UTC)
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Daily nudge + Day 20 re-assessment trigger — 07:00 WAT (05:00 UTC)
 [functions."forged-daily-nudge"]
   schedule = "0 5 * * *"
 
-# Day 20 re-assessment trigger — 07:00 WAT (05:00 UTC)
 [functions."forged-day20-reassess-trigger"]
   schedule = "0 5 * * *"
 
-# Weekly org lead scanner — Monday 08:00 WAT (06:00 UTC)
+# Weekly organisation concentration report — Monday 08:00 WAT (06:00 UTC)
 [functions."forged-org-leads"]
   schedule = "0 6 * * 1"
 
-# Public dashboard serving — /dashboard/:slug
+# ── REDIRECTS ─────────────────────────────────────────────────────────────────
+
+# Dashboard slug redirect — personalised subscriber dashboards
 [[redirects]]
-  from = "/dashboard/:slug"
-  to = "/.netlify/functions/forged-dashboard-view?slug=:slug"
+  from   = "/dashboard/:slug"
+  to     = "/.netlify/functions/forged-dashboard-view?slug=:slug"
   status = 200
+
+# Convenience redirects — short URLs for sharing
+[[redirects]]
+  from   = "/start"
+  to     = "/pulse.html"
+  status = 301
+
+[[redirects]]
+  from   = "/lab"
+  to     = "/forge-lab-interest.html"
+  status = 301
+
+[[redirects]]
+  from   = "/enquire"
+  to     = "/corporate-enquiry.html"
+  status = 301
+
+[[redirects]]
+  from   = "/feedback"
+  to     = "/feedback.html"
+  status = 301
+
+[[redirects]]
+  from   = "/proposal"
+  to     = "/FORGED-Corporate-Proposal.html"
+  status = 301
+
+# ── HEADERS ──────────────────────────────────────────────────────────────────
+
+# Security headers across all pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options             = "DENY"
+    X-Content-Type-Options      = "nosniff"
+    Referrer-Policy             = "strict-origin-when-cross-origin"
+    Permissions-Policy          = "camera=(), microphone=(), geolocation=()"
+    X-XSS-Protection            = "1; mode=block"
+
+# Cache control for static assets
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ── SPLIT TESTING ─────────────────────────────────────────────────────────────
+# A/B test: pulse.html opening copy variants
+# Activate by creating pulse-b.html with the alternative opening
+# and uncommenting the block below once both variants are deployed
+
+# [context.split-test]
+#   [[context.split-test.branches]]
+#     branch = "main"
+#     percentage = 50
+#   [[context.split-test.branches]]
+#     branch = "pulse-variant-b"
+#     percentage = 50
