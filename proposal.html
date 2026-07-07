@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FORGED — Institutional Resilience Proposal</title>
+<style>
+  :root {
+    --navy: #1C3557;
+    --crimson: #8B1A1A;
+    --gold: #B8860B;
+    --cream: #F7F5F0;
+    --ink: #1A1A1A;
+    --muted: #5B6472;
+    --line: #E3DFD6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Calibri', 'Segoe UI', sans-serif;
+    color: var(--ink);
+    background: var(--cream);
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, .serif-accent {
+    font-family: 'Cambria', 'Georgia', serif;
+  }
+
+  .header {
+    background: var(--navy);
+    color: #EDEAE2;
+    padding: 56px 40px 64px;
+    position: relative;
+    overflow: hidden;
+    border-left: 6px solid var(--gold);
+  }
+
+  .eyebrow {
+    font-family: 'Calibri', sans-serif;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .header h1 {
+    font-size: 44px;
+    font-weight: 400;
+    margin-top: 18px;
+    color: #F7F5F0;
+    max-width: 640px;
+    text-wrap: balance;
+  }
+
+  .header h1 em {
+    font-style: italic;
+    color: #D9C6A0;
+  }
+
+  .header .subtitle {
+    margin-top: 14px;
+    font-size: 17px;
+    color: #C6CBD4;
+    max-width: 640px;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .section {
+    padding: 56px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section:last-of-type {
+    border-bottom: none;
+  }
+
+  .lede {
+    font-family: 'Cambria', serif;
+    font-size: 24px;
+    color: var(--navy);
+    max-width: 620px;
+  }
+
+  .lede em {
+    font-style: italic;
+    color: var(--crimson);
+  }
+
+  .body-text {
+    margin-top: 18px;
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 620px;
+  }
+
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 32px;
+  }
+
+  .pillar {
+    background: #FFFFFF;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--gold);
+    padding: 24px 20px;
+  }
+
+  .pillar .label {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .pillar h3 {
+    font-size: 19px;
+    color: var(--navy);
+    margin-top: 8px;
+    font-weight: 400;
+  }
+
+  .pillar p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  .quote-block {
+    background: #EEF1F5;
+    border-left: 4px solid var(--navy);
+    padding: 28px 32px;
+    margin-top: 8px;
+  }
+
+  .quote-block p {
+    font-family: 'Cambria', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--navy);
+    line-height: 1.5;
+  }
+
+  .quote-block .attribution {
+    margin-top: 14px;
+    font-family: 'Calibri', sans-serif;
+    font-style: normal;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .cta-panel {
+    background: var(--navy);
+    color: #EDEAE2;
+    padding: 48px 40px;
+    text-align: left;
+    border-left: 6px solid var(--crimson);
+  }
+
+  .cta-panel h2 {
+    font-size: 26px;
+    font-weight: 400;
+    color: #F7F5F0;
+  }
+
+  .cta-panel p {
+    margin-top: 12px;
+    font-size: 15px;
+    color: #C6CBD4;
+    max-width: 520px;
+  }
+
+  .cta-buttons {
+    margin-top: 28px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 14px 26px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: opacity 0.15s ease;
+  }
+
+  .btn:hover { opacity: 0.88; }
+  .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--navy);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: #F7F5F0;
+    border: 1px solid #5B6472;
+  }
+
+  .footer {
+    padding: 32px 40px 48px;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .footer .signature {
+    font-family: 'Cambria', serif;
+    font-style: italic;
+    color: var(--navy);
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 640px) {
+    .header, .container, .cta-panel, .footer { padding-left: 24px; padding-right: 24px; }
+    .header h1 { font-size: 32px; }
+    .pillars { grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="eyebrow">FORGED &nbsp;·&nbsp; Resilience Coaching Lab</div>
+    <h1>Institutional <em>Resilience</em> Proposal</h1>
+    <p class="subtitle">A structured, evidence-based resilience programme for organisations preparing leaders to perform under sustained pressure — built on the FORGED Resilience Index (FRI).</p>
+  </div>
+
+  <div class="container">
+
+    <div class="section">
+      <p class="lede">Pressure exposes more than performance — <em>it reveals resilience.</em></p>
+      <p class="body-text">Institutions carry pressure differently than individuals do. It surfaces in retention, in decision fatigue, in the quiet erosion of team cohesion under sustained demand. FORGED was designed to give leadership teams a structured, measurable way to build the resilience that sustained performance actually requires — not through generic wellness content, but through a diagnostic instrument and a coaching architecture built specifically for institutions.</p>
+
+      <div class="pillars">
+        <div class="pillar">
+          <div class="label">Diagnostic</div>
+          <h3>FORGED Resilience Index</h3>
+          <p>A seven-dimension instrument assessing emotional regulation, cognitive flexibility, social support, purpose, physical vitality, adaptive coping, and identity stability.</p>
+        </div>
+        <div class="pillar">
+          <div class="label">Delivery</div>
+          <h3>WhatsApp-Native Coaching</h3>
+          <p>Daily guided reflection and coaching delivered directly to each leader's phone — no app to install, no additional platform to learn.</p>
+        </div>
+        <div class="pillar">
+          <div class="label">Oversight</div>
+          <h3>Coach Orange, Principal</h3>
+          <p>23+ years of institutional practice across Namibian and SADC organisations, grounding the programme in real leadership context.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="lede">Built for institutions, not individuals.</p>
+      <p class="body-text">The corporate pathway differs materially from the individual subscriber journey. Cohorts are structured, progress is tracked at both individual and team level, and the engagement is scoped, priced, and sequenced against your organisation's specific leadership development objectives — whether that is a single supervisory cohort or a multi-phase culture transformation initiative.</p>
+
+      <div class="quote-block">
+        <p>"Pressure does not create who you are. It reveals what is already inside you. This assessment is not a verdict — it is a mirror. What you see here is your starting point, your foundation strength, and the frontier where your greatest leadership growth lives."</p>
+        <div class="attribution">— Coach Orange, FORGED Resilience Coaching Lab</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="cta-panel">
+    <h2>Request the full institutional proposal</h2>
+    <p>The complete proposal document includes programme structure, cohort sizing, phased pricing, and delivery timeline — tailored to your organisation on request.</p>
+    <div class="cta-buttons">
+      <a class="btn btn-primary" href="mailto:resilience.cxc@gmail.com?subject=Request%20-%20FORGED%20Institutional%20Proposal&body=Please%20send%20the%20full%20FORGED%20Institutional%20Resilience%20Proposal%20for%20our%20organisation.%0A%0AOrganisation%20name%3A%0AContact%20person%3A%0ANumber%20of%20leaders%2Fsupervisors%3A">Request by Email</a>
+      <a class="btn btn-secondary" href="https://resilience-coaching.org/enquire">Submit a Corporate Enquiry</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p class="signature">FORGED — Resilience Coaching Lab</p>
+    <p>A programme of Change Experience Consulting (CXC) &nbsp;·&nbsp; CC/2008/1668 &nbsp;·&nbsp; Walvis Bay, Namibia</p>
+  </div>
+
+</body>
+</html>
