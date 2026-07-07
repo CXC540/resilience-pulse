@@ -37,6 +37,21 @@
     border-left: 6px solid var(--gold);
   }
 
+  .header::after {
+    content: "FRI";
+    position: absolute;
+    right: 48px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Cambria', serif;
+    font-size: 160px;
+    font-weight: 400;
+    color: rgba(216, 198, 160, 0.08);
+    letter-spacing: 4px;
+    pointer-events: none;
+    line-height: 1;
+  }
+
   .eyebrow {
     font-family: 'Calibri', sans-serif;
     letter-spacing: 3px;
@@ -47,12 +62,14 @@
   }
 
   .header h1 {
-    font-size: 44px;
+    font-size: 48px;
     font-weight: 400;
     margin-top: 18px;
     color: #F7F5F0;
-    max-width: 640px;
+    max-width: 700px;
     text-wrap: balance;
+    position: relative;
+    z-index: 1;
   }
 
   .header h1 em {
@@ -64,7 +81,17 @@
     margin-top: 14px;
     font-size: 17px;
     color: #C6CBD4;
-    max-width: 640px;
+    max-width: 700px;
+    position: relative;
+    z-index: 1;
+    text-align: justify;
+    text-align-last: left;
+    hyphens: auto;
+  }
+
+  .eyebrow {
+    position: relative;
+    z-index: 1;
   }
 
   .container {
@@ -99,6 +126,9 @@
     font-size: 16px;
     color: var(--muted);
     max-width: 620px;
+    text-align: justify;
+    text-align-last: left;
+    hyphens: auto;
   }
 
   .pillars {
@@ -134,6 +164,9 @@
     font-size: 14px;
     color: var(--muted);
     margin-top: 10px;
+    text-align: justify;
+    text-align-last: left;
+    hyphens: auto;
   }
 
   .quote-block {
@@ -180,6 +213,9 @@
     font-size: 15px;
     color: #C6CBD4;
     max-width: 520px;
+    text-align: justify;
+    text-align-last: left;
+    hyphens: auto;
   }
 
   .cta-buttons {
