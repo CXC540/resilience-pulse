@@ -40,27 +40,27 @@
 [[redirects]]
   from   = "/start"
   to     = "/pulse.html"
-  status = 301
+  status = 200
 
 [[redirects]]
   from   = "/lab"
   to     = "/forge-lab-interest.html"
-  status = 301
+  status = 200
 
 [[redirects]]
   from   = "/enquire"
   to     = "/corporate-enquiry.html"
-  status = 301
+  status = 200
 
 [[redirects]]
   from   = "/feedback"
   to     = "/feedback.html"
-  status = 301
+  status = 200
 
 [[redirects]]
   from   = "/proposal"
-  to     = "/FORGED-Corporate-Proposal.html"
-  status = 301
+  to     = "/proposal.html"
+  status = 200
 
 # ── HEADERS ──────────────────────────────────────────────────────────────────
 
