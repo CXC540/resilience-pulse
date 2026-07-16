@@ -2,17 +2,39 @@
  * FORGED Resilience Lab — Daily Nudge Scheduler
  * Netlify Scheduled Function — runs daily at 05:00 UTC (07:00 WAT)
  *
- * Automations:
+ * ── QUARANTINE NOTICE (this revision) ──────────────────────────────────
+ * The Day-21 auto-completion block (dashboard generation + "Launchpad
+ * Graduate / Resilience Champion" completion message) has been REMOVED
+ * from this file, not just disabled, because it called
+ * generateAndStoreDay21Dashboard() from netlify/functions/lib/forged-
+ * dashboard-generator.mjs — a stale, divergent copy of the dashboard
+ * template still on the retired 21-day model. That file has been renamed
+ * to forged-dashboard-generator.LEGACY.mjs and is no longer imported
+ * anywhere; nothing in this deployment calls it.
+ *
+ * Practical effect of this change:
+ *   - Daily nudges for days 1–21 are UNCHANGED — same generation, same
+ *     send logic, same logging.
+ *   - No dashboard is auto-generated or auto-sent on completion anymore.
+ *     Send the /dashboard/{slug} link manually via the current
+ *     netlify/functions/forged-dashboard-generator.mjs +
+ *     forged-dashboard-view.mjs pair in the meantime.
+ *
+ * ── SEPARATE, PRE-EXISTING GAP — NOT FIXED BY THIS REVISION ────────────
+ * Line ~190 below still reads `if (day < 1 || day > 21) skip` — every
+ * subscriber past day 21 is already excluded from receiving ANY daily
+ * nudge, independent of the change above. Under the 12-month membership
+ * model this means months 2–12 currently receive nothing. This requires
+ * its own migration (rewriting the day-tracking and dimension-rotation
+ * logic for a 12-month cadence) and was deliberately left untouched here
+ * to keep this a narrow, low-risk quarantine rather than a rewrite.
+ *
+ * Automations (as of this revision):
  *   - Reads Active subscribers from Airtable daily
  *   - Generates personalised nudge via Claude Haiku (weakest RCI dimension)
  *   - Sends via Meta Cloud API → WhatsApp
  *   - Logs delivery to Nudge Log table
- *   - Auto-sets Status to "Completed" on Day 21
- *   - Generates personalised Day 21 Progress Dashboard (Path A — full build)
- *   - Sends completion message with real dashboard link on Day 21
  */
-
-import { generateAndStoreDay21Dashboard } from "./lib/forged-dashboard-generator.mjs";
 
 export const config = {
   schedule: "0 5 * * *"
@@ -23,19 +45,17 @@ const SUBSCRIBERS_TBL = "tblCKeMaj5p5Lwl0m";
 const NUDGE_LOG_TBL   = "tblwWnRJscLpOiYw2";
 // TODO: replace with real table ID after creating this table —
 // see SCHEMA-airtable-additions.txt section 2
+// Currently unused pending the future 12-month migration — was only
+// referenced by functions removed in this revision. Left in place
+// rather than deleted since the Monthly Reassessments / journal work
+// will need a table reference here again.
 const JOURNAL_TBL     = "tblHD5ZSXEOatYq4P";
 const PHONE_ID        = "1135778909625987";
 const CLAUDE_MODEL    = "claude-haiku-4-5-20251001";
 
-const DAY21_RCI_FIELDS = {
-  "Emotional Regulation":  "Day 21 — Emotional Regulation",
-  "Cognitive Flexibility": "Day 21 — Cognitive Flexibility",
-  "Social Support":        "Day 21 — Social Support",
-  "Purpose & Meaning":     "Day 21 — Purpose & Meaning",
-  "Physical Vitality":     "Day 21 — Physical Vitality",
-  "Adaptive Coping":       "Day 21 — Adaptive Coping",
-  "Identity Stability":    "Day 21 — Identity Stability",
-};
+// DAY21_RCI_FIELDS removed in this revision — its only use was in the
+// Day-21 completion branch, which no longer exists (see QUARANTINE
+// NOTICE at top of file).
 
 const RCI_FIELDS = {
   "Emotional Regulation": "fldIWvC9FfkOqUnX0",
@@ -139,31 +159,10 @@ async function logNudge(apiKey, { name, day, dimension, message, status, error }
   });
 }
 
-async function fetchJournalEntries(apiKey, subscriberRecordId) {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${JOURNAL_TBL}` +
-    `?filterByFormula=FIND("${subscriberRecordId}", ARRAYJOIN({Subscriber}))&sort[0][field]=Day Number&sort[0][direction]=asc`;
-  try {
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${apiKey}` } });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.records || []).map(r => ({
-      day:       r.fields["Day Number"],
-      dimension: r.fields["Dimension"],
-      text:      r.fields["Reflection Text"],
-    }));
-  } catch {
-    return [];
-  }
-}
+// fetchJournalEntries() and updateSubscriberFields() removed in this
+// revision — their only callers were inside the Day-21 completion branch,
+// which no longer exists (see QUARANTINE NOTICE at top of file).
 
-async function updateSubscriberFields(apiKey, recordId, fields) {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${SUBSCRIBERS_TBL}/${recordId}`;
-  await fetch(url, {
-    method: "PATCH",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ fields })
-  });
-}
 
 async function updateSubscriberNudgeStatus(apiKey, recordId, status) {
   const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${SUBSCRIBERS_TBL}/${recordId}`;
@@ -179,21 +178,9 @@ async function updateSubscriberNudgeStatus(apiKey, recordId, status) {
   });
 }
 
-async function markSubscriberCompleted(apiKey, recordId) {
-  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${SUBSCRIBERS_TBL}/${recordId}`;
-  await fetch(url, {
-    method: "PATCH",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      fields: {
-        "Status":            "Completed",
-        "Last Nudge Date":   new Date().toISOString().split("T")[0],
-        "Last Nudge Status": "Delivered",
-        "Notes":             "21-day Blueprint completed automatically on " + new Date().toISOString().split("T")[0],
-      }
-    })
-  });
-}
+// markSubscriberCompleted() removed in this revision — see QUARANTINE
+// NOTICE at top of file. Its only caller was the Day-21 completion
+// branch below, which has also been removed.
 
 async function sendWhatsApp(accessToken, to, message) {
   const url = `https://graph.facebook.com/v19.0/${PHONE_ID}/messages`;
@@ -212,10 +199,10 @@ async function sendWhatsApp(accessToken, to, message) {
   return data.messages?.[0]?.id;
 }
 
-async function sendDay21Completion(accessToken, to, name, dashboardUrl) {
-  const message = `🔥 *FORGED — Day 21 Complete*\n\n${name}, you have completed your 21-Day Resilience Launchpad.\n\nYou are now a *Launchpad Graduate* and a *Resilience Champion*. Both titles are earned, not given — you showed up.\n\nYour full Progress Dashboard — before and after, side by side — is ready here:\n${dashboardUrl}\n\nThis is not the end. It is the beginning of a more grounded, more purposeful leadership journey across Africa.\n\nCoach Orange will be in touch shortly with your next step. You have been forged.`;
-  return sendWhatsApp(accessToken, to, message);
-}
+// sendDay21Completion() removed in this revision — see QUARANTINE
+// NOTICE at top of file. It sent retired "Launchpad Graduate /
+// Resilience Champion" completion copy and called the stale legacy
+// dashboard generator.
 
 async function generateNudge(anthropicKey, { name, day, dimension, score, tieCount }) {
   const context = DIMENSION_CONTEXT[dimension];
@@ -266,6 +253,10 @@ export default async function handler() {
   const ANTHROPIC_KEY = getEnv("ANTHROPIC_API_KEY");
   const META_TOKEN    = getEnv("META_ACCESS_TOKEN");
 
+  // `completed` is retained in the counters/response shape for backward
+  // compatibility with anything monitoring this function's output, but it
+  // will always be 0 now — the Day-21 completion branch that used to
+  // increment it was removed in this revision (see QUARANTINE NOTICE).
   let sent = 0, skipped = 0, failed = 0, completed = 0;
 
   try {
@@ -303,58 +294,12 @@ export default async function handler() {
 
         await logNudge(AIRTABLE_KEY, { name, day, dimension, message, status: "Delivered" });
 
-        if (day === 21) {
-          const reassessComplete = DAY21_RCI_FIELDS["Cognitive Flexibility"] in f
-            ? Object.values(DAY21_RCI_FIELDS).every(fieldName => f[fieldName] !== undefined)
-            : false;
-
-          if (!reassessComplete) {
-            // Re-assessment not yet completed (subscriber hasn't replied to all 7
-            // Day 20 questions yet) — send a gentle nudge instead of a broken dashboard.
-            await sendWhatsApp(META_TOKEN, to,
-              `🔥 *FORGED — Day 21*\n\n${name}, your 21 days are complete — but we're still missing your re-assessment answers. Your Progress Dashboard needs all 7 to show your real before-and-after.\n\nReply with a number 1-5 to pick up where you left off, or message Coach Orange directly if you'd like to do this by phone instead.`);
-            console.log(`[FORGED] ⏸ ${name} | Day 21 reached but re-assessment incomplete — dashboard deferred`);
-            skipped++;
-            continue;
-          }
-
-          const day1Scores = {};
-          const day21Scores = {};
-          for (const [dim, fieldId] of Object.entries(RCI_FIELDS)) {
-            day1Scores[dim] = f[fieldId] ?? f[dim] ?? 3;
-          }
-          for (const [dim, fieldName] of Object.entries(DAY21_RCI_FIELDS)) {
-            day21Scores[dim] = f[fieldName] ?? day1Scores[dim];
-          }
-
-          const journalEntries = await fetchJournalEntries(AIRTABLE_KEY, record.id);
-
-          const dashboardUrl = await generateAndStoreDay21Dashboard({
-            name,
-            organisation:   f["Organisation"] || "",
-            jobTitle:       f["Job Title"] || "",
-            day1Scores,
-            day21Scores,
-            nudgesEngaged:  f["Nudges Engaged Count"] || 0,
-            journalCount:   f["Journal Reflection Count"] || 0,
-            callsCompleted: f["Calls Completed"] || 0,
-            journalEntries,
-            recordId:       record.id,
-          });
-
-          await updateSubscriberFields(AIRTABLE_KEY, record.id, {
-            "Dashboard URL":  dashboardUrl,
-            "Dashboard Slug": `day21-${record.id}`,
-          });
-
-          await sendDay21Completion(META_TOKEN, to, name, dashboardUrl);
-          await markSubscriberCompleted(AIRTABLE_KEY, record.id);
-          console.log(`[FORGED] ✓ ${name} | Day 21 COMPLETE — dashboard generated at ${dashboardUrl}`);
-          completed++;
-        } else {
-          await updateSubscriberNudgeStatus(AIRTABLE_KEY, record.id, "Delivered");
-          console.log(`[FORGED] ✓ ${name} | Day ${day} | ${dimension} | MsgID: ${msgId}`);
-        }
+        // Day-21 auto-completion branch removed in this revision — see
+        // QUARANTINE NOTICE at top of file. Day 21 now falls through to
+        // the same standard handling as every other day; no dashboard is
+        // auto-generated or auto-sent here anymore.
+        await updateSubscriberNudgeStatus(AIRTABLE_KEY, record.id, "Delivered");
+        console.log(`[FORGED] ✓ ${name} | Day ${day} | ${dimension} | MsgID: ${msgId}`);
 
         sent++;
 
