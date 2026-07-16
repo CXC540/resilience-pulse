@@ -31,9 +31,15 @@
 # ── REDIRECTS ─────────────────────────────────────────────────────────────────
 
 # Dashboard slug redirect — personalised subscriber dashboards
+# NOTE: uses a splat (*), not a named parameter (:slug), because Netlify's
+# documented, guaranteed-reliable pattern for passing a captured path
+# segment into a function's query string is the splat form. The
+# named-parameter form (/dashboard/:slug -> ...?slug=:slug) was tested
+# live on both the netlify.app subdomain and the custom domain and did
+# not pass the parameter through in either case.
 [[redirects]]
-  from   = "/dashboard/:slug"
-  to     = "/.netlify/functions/forged-dashboard-view?slug=:slug"
+  from   = "/dashboard/*"
+  to     = "/.netlify/functions/forged-dashboard-view?slug=:splat"
   status = 200
 
 # Convenience redirects — short URLs for sharing
