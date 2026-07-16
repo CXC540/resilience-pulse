@@ -1,8 +1,20 @@
 /**
- * FORGED — Dashboard Public View (Revision 2 — Live Momentum Layer)
+ * FORGED — Dashboard Public View (Revision 3 — Path-Based Slug Fallback)
  * Netlify Function (HTTP endpoint) — serves the cached, personalised
  * dashboard stored in Netlify Blobs by forged-dashboard-generator.mjs,
  * and injects a LIVE engagement snapshot on every request.
+ *
+ * ── REVISION 3 FIX ──────────────────────────────────────────────────
+ * Live testing this session showed /dashboard/{slug} returning "Dashboard
+ * not found" via the netlify.toml redirect, on both the netlify.app
+ * subdomain and the custom domain, with BOTH a named-parameter redirect
+ * (/dashboard/:slug -> ...?slug=:slug) and Netlify's documented splat
+ * form (/dashboard/* -> ...?slug=:splat). Querying the function directly
+ * with ?slug=X in the URL always worked. This strongly suggests the
+ * rewritten query string isn't being reflected in req.url for this
+ * function format — so the slug is now read from the URL PATH as a
+ * fallback whenever a "slug" query param isn't present, which works
+ * regardless of what the rewrite does or doesn't do to the query string.
  *
  * ── WHY THIS REVISION EXISTS ───────────────────────────────────────────
  * The diagnostic content (FRI rings, radar, capstone) is deliberately
@@ -68,8 +80,21 @@ const DIMENSION_TO_LETTER = {
 const FORGED_LETTERS = ["F", "O", "R", "G", "E", "D"];
 
 export default async function handler(req) {
-  const url  = new URL(req.url);
-  const slug = url.searchParams.get("slug");
+  const url = new URL(req.url);
+
+  // Slug can arrive two ways:
+  //  1. As a query param (?slug=X) — true for direct/manual testing, and
+  //     for redirects where Netlify does substitute the query string.
+  //  2. As the last path segment (/dashboard/X) — the request as the
+  //     browser actually sent it, before any rewrite. Falling back to
+  //     this covers the case where the redirect's rewritten query string
+  //     isn't reflected in req.url for this function format, which live
+  //     testing this session showed was happening even with a
+  //     Netlify-documented splat-based redirect rule.
+  const pathSlug = url.pathname.startsWith("/dashboard/")
+    ? url.pathname.slice("/dashboard/".length).split("/")[0]
+    : null;
+  const slug = url.searchParams.get("slug") || (pathSlug ? decodeURIComponent(pathSlug) : null);
 
   if (!slug) {
     return new Response("Dashboard not found.", { status: 404 });
