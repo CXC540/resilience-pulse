@@ -125,18 +125,32 @@ export default async function handler(req) {
     const friOverall = Math.round(average(Object.values(friScores)));
     const feiOverall = Math.round(average(Object.values(feiScores)));
 
-    // 3. Render personal results and store under a secure random slug
-    //    so the respondent can revisit later.
+    // 3. Render personal results and store under a secure random slug —
+    //    this is the ONLY copy of the results with a real, bookmarkable
+    //    URL. A prior version returned this HTML directly for inline
+    //    display, which left the browser's address bar on the survey
+    //    form's URL — confirmed live in testing to make the page's own
+    //    "bookmark this page" instruction false. Now: redirect to the
+    //    stored slug's real URL whenever storage succeeds, so the URL
+    //    the respondent ends up on is the one that actually reloads
+    //    their results later.
     const slug = `${slugifyName(name)}-${randomBytes(12).toString("hex")}`;
     const html = renderResultsHtml({ name, friScores, feiScores, friOverall, feiOverall, slug });
 
+    let stored = false;
     try {
       const store = getStore("forged-teampulse-results");
       await store.set(slug, html);
+      stored = true;
     } catch (err) {
-      console.error(`[Team Pulse] Blob storage failed (non-fatal, results still shown now): ${err.message}`);
+      console.error(`[Team Pulse] Blob storage failed (non-fatal — falling back to inline display, no bookmarkable link this time): ${err.message}`);
     }
 
+    if (stored) {
+      return json({ success: true, resultsUrl: `/.netlify/functions/forged-teampulse-view?slug=${encodeURIComponent(slug)}` });
+    }
+    // Fallback: storage failed, so there's no slug to redirect to —
+    // show results inline this one time rather than lose them entirely.
     return new Response(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } });
   } catch (err) {
     console.error(`[Team Pulse] Unexpected error: ${err.message}`);
@@ -166,6 +180,54 @@ function json(body, status = 200) {
  * subscriber; the framing, copy, and layout reflect a one-time personal
  * takeaway, not an ongoing coaching relationship.
  */
+// Deterministic FRI/FEI gap analysis — no AI call needed at the
+// individual level, since this is pure per-force comparison arithmetic.
+// Priority ordering matches the manually-validated commentary pattern:
+// ties broken by whichever score is more concerning in absolute terms
+// (lower resilience for "exposed," lower engagement for "unrecognised"),
+// not just gap size alone.
+const GAP_THRESHOLD = 20;
+
+function analysePattern(friScores, feiScores) {
+  const gaps = FORCES.map((f) => ({
+    ...f,
+    fri: friScores[f.key],
+    fei: feiScores[f.key],
+    gap: feiScores[f.key] - friScores[f.key],
+  }));
+  const exposed = gaps.filter((g) => g.gap >= GAP_THRESHOLD)
+    .sort((a, b) => b.gap - a.gap || a.fri - b.fri);
+  const unrecognised = gaps.filter((g) => g.gap <= -GAP_THRESHOLD)
+    .sort((a, b) => a.gap - b.gap || a.fei - b.fei);
+  return { exposed, unrecognised };
+}
+
+function renderCommentary(friScores, feiScores) {
+  const { exposed, unrecognised } = analysePattern(friScores, feiScores);
+
+  if (exposed.length === 0 && unrecognised.length === 0) {
+    return `<p class="commentary-line">Your resilience and engagement scores move together across all six forces \u2014 no force stands out as a gap to prioritise right now.</p>`;
+  }
+
+  const lines = [];
+
+  exposed.forEach((g, i) => {
+    const opener = i === 0 ? `<strong>${escapeHtml(g.label)}</strong> is the one to watch.` : `<strong>${escapeHtml(g.label)}</strong> shows a milder version of the same shape.`;
+    lines.push(`<p class="commentary-line">${opener} At ${g.fri}% resilience but ${g.fei}% engagement, this is a "motivated but exposed" pattern \u2014 real pull toward this area, with less capacity underneath it than the engagement score alone would suggest.</p>`);
+  });
+
+  unrecognised.forEach((g, i) => {
+    const opener = i === 0 ? `<strong>${escapeHtml(g.label)}</strong> runs the opposite way.` : `<strong>${escapeHtml(g.label)}</strong> shows the same inverse pattern.`;
+    lines.push(`<p class="commentary-line">${opener} ${g.fri}% resilience but only ${g.fei}% engagement \u2014 real capacity here that isn't yet showing up as a felt sense of support or recognition day to day.</p>`);
+  });
+
+  if (exposed.length > 0) {
+    lines.push(`<p class="commentary-line summary">In short: the risk here isn't a lack of resilience overall \u2014 it's concentrated specifically where engagement is outrunning it, starting with ${escapeHtml(exposed[0].label)}.</p>`);
+  }
+
+  return lines.join("");
+}
+
 function renderResultsHtml({ name, friScores, feiScores, friOverall, feiOverall, slug }) {
   const firstName = String(name).split(" ")[0];
   const radarSvg = buildDualRadar(friScores, feiScores);
@@ -208,6 +270,9 @@ function renderResultsHtml({ name, friScores, feiScores, friOverall, feiOverall,
   .fri-tag { background:rgba(184,134,11,0.15); color:#8a660c; padding:3px 8px; border-radius:10px; font-size:12px; font-weight:700; }
   .fei-tag { background:rgba(139,26,26,0.12); color:var(--crimson); padding:3px 8px; border-radius:10px; font-size:12px; font-weight:700; }
   .save-note { text-align:center; background:#fff; border:1px dashed var(--line); border-radius:8px; padding:16px; font-size:13px; color:var(--muted); }
+  .commentary-line { background:#fff; border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:0 8px 8px 0; padding:16px 18px; margin-bottom:12px; font-size:14.5px; color:var(--ink); line-height:1.6; }
+  .commentary-line strong { color:var(--navy); }
+  .commentary-line.summary { border-left-color:var(--crimson); background:rgba(139,26,26,0.04); font-style:italic; color:var(--navy); }
   .footer { text-align:center; padding:30px 20px; font-size:13px; color:var(--muted); }
 </style>
 </head>
@@ -230,6 +295,11 @@ function renderResultsHtml({ name, friScores, feiScores, friOverall, feiOverall,
     <div class="radar-wrap">${radarSvg}</div>
     <div class="radar-key"><span class="key-gold">\u25CF Resilience</span><span class="key-crimson">\u25CF Engagement</span></div>
     <div class="legend-grid">${legendItems}</div>
+  </div>
+
+  <div class="beat">
+    <div class="beat-label">What This Means</div>
+    ${renderCommentary(friScores, feiScores)}
   </div>
 
   <div class="beat">
