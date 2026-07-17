@@ -2,38 +2,51 @@
  * FORGED Resilience Lab — Daily Nudge Scheduler
  * Netlify Scheduled Function — runs daily at 05:00 UTC (07:00 WAT)
  *
- * ── QUARANTINE NOTICE (this revision) ──────────────────────────────────
+ * ── THIS REVISION: TWO GAPS CLOSED ─────────────────────────────────────
+ * 1. Automatic Dashboard Slug generation — every active subscriber now
+ *    gets a slug assigned automatically (slugified name + short unique
+ *    suffix) the first time this function sees them without one.
+ *    Previously this field was only ever populated by hand.
+ * 2. Automatic dashboard delivery — narrowly scoped to the pilot's
+ *    week-4 checkpoint (day 28), NOT a full 12-month cadence. Calls the
+ *    real forged-dashboard-generator.mjs internally, sends a
+ *    proportionate WhatsApp message (no "Graduate"/"Champion" language —
+ *    those are reserved for the defined 3/6/12-month milestones), and
+ *    marks the record so it never re-fires.
+ *
+ * ── REQUIRED SETUP BEFORE THIS WORKS ────────────────────────────────────
+ * Add a new checkbox field to Blueprint Subscribers:
+ *     "Week 4 Dashboard Sent"  (Checkbox, default unchecked)
+ * No tool available this session could create it directly — needs to be
+ * added by hand in Airtable before this deploys, or the PATCH calls that
+ * reference it will silently fail to persist (Airtable ignores unknown
+ * field writes rather than erroring, so this fails quietly, not loudly —
+ * worth checking the field exists before relying on this).
+ *
+ * ── QUARANTINE NOTICE (carried over from the previous revision) ────────
  * The Day-21 auto-completion block (dashboard generation + "Launchpad
- * Graduate / Resilience Champion" completion message) has been REMOVED
- * from this file, not just disabled, because it called
+ * Graduate / Resilience Champion" completion message) was removed
+ * entirely, not just disabled, because it called
  * generateAndStoreDay21Dashboard() from netlify/functions/lib/forged-
  * dashboard-generator.mjs — a stale, divergent copy of the dashboard
  * template still on the retired 21-day model. That file has been renamed
  * to forged-dashboard-generator.LEGACY.mjs and is no longer imported
  * anywhere; nothing in this deployment calls it.
  *
- * Practical effect of this change:
- *   - Daily nudges for days 1–21 are UNCHANGED — same generation, same
- *     send logic, same logging.
- *   - No dashboard is auto-generated or auto-sent on completion anymore.
- *     Send the /dashboard/{slug} link manually via the current
- *     netlify/functions/forged-dashboard-generator.mjs +
- *     forged-dashboard-view.mjs pair in the meantime.
- *
- * ── SEPARATE, PRE-EXISTING GAP — NOT FIXED BY THIS REVISION ────────────
- * Line ~190 below still reads `if (day < 1 || day > 21) skip` — every
- * subscriber past day 21 is already excluded from receiving ANY daily
- * nudge, independent of the change above. Under the 12-month membership
- * model this means months 2–12 currently receive nothing. This requires
- * its own migration (rewriting the day-tracking and dimension-rotation
- * logic for a 12-month cadence) and was deliberately left untouched here
- * to keep this a narrow, low-risk quarantine rather than a rewrite.
+ * ── SEPARATE, PRE-EXISTING GAP — STILL NOT FIXED ────────────────────────
+ * Days 22–27 and 29+ still receive no nudge at all (only day 28 has an
+ * exception, added above). Full months 2–12 coverage requires the same
+ * migration this always needed — rewriting the day-tracking and
+ * dimension-rotation logic for a 12-month cadence (Option B), which is
+ * deliberately still deferred.
  *
  * Automations (as of this revision):
  *   - Reads Active subscribers from Airtable daily
+ *   - Ensures every subscriber has a Dashboard Slug (this revision)
  *   - Generates personalised nudge via Claude Haiku (weakest RCI dimension)
  *   - Sends via Meta Cloud API → WhatsApp
  *   - Logs delivery to Nudge Log table
+ *   - Sends week-4 dashboard link once, at day 28 (this revision)
  */
 
 export const config = {
@@ -52,6 +65,12 @@ const NUDGE_LOG_TBL   = "tblwWnRJscLpOiYw2";
 const JOURNAL_TBL     = "tblHD5ZSXEOatYq4P";
 const PHONE_ID        = "1135778909625987";
 const CLAUDE_MODEL    = "claude-haiku-4-5-20251001";
+
+// Site's own public URL — used both to internally invoke the dashboard
+// generator and as the base for links sent to subscribers. Netlify sets
+// process.env.URL to the site's primary domain automatically; the
+// fallback matters only in local/dev contexts where that isn't set.
+const SITE_URL = process.env.URL || "https://resilience-coaching.org";
 
 // DAY21_RCI_FIELDS removed in this revision — its only use was in the
 // Day-21 completion branch, which no longer exists (see QUARANTINE
@@ -182,6 +201,82 @@ async function updateSubscriberNudgeStatus(apiKey, recordId, status) {
 // NOTICE at top of file. Its only caller was the Day-21 completion
 // branch below, which has also been removed.
 
+/**
+ * GAP FIX 1 — automatic slug generation.
+ * Every subscriber needs a Dashboard Slug before a link can ever be sent
+ * or manually generated for them. Previously nothing populated this
+ * field automatically — it only existed on records someone had typed
+ * into by hand (as we did for testing this session). This runs for
+ * every active subscriber on every scheduled run, and is a no-op
+ * (returns the existing value immediately) once a slug already exists.
+ *
+ * Format: slugified name + a short, stable suffix from the record ID,
+ * so two subscribers with the same name never collide.
+ */
+async function ensureDashboardSlug(apiKey, recordId, existingSlug, rawName) {
+  if (existingSlug) return existingSlug;
+
+  const base = String(rawName || "member")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "member";
+  const suffix = recordId.slice(-5).toLowerCase();
+  const slug = `${base}-${suffix}`;
+
+  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${SUBSCRIBERS_TBL}/${recordId}`;
+  await fetch(url, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: { "Dashboard Slug": slug } })
+  });
+
+  return slug;
+}
+
+/**
+ * GAP FIX 2 — automatic delivery, scoped narrowly to the pilot's week-4
+ * checkpoint (day 28), NOT a full 12-month cadence. That larger rebuild
+ * (Option B) is deliberately still deferred. This:
+ *   1. Calls the real forged-dashboard-generator.mjs internally over
+ *      HTTP (the same call proven working during manual testing this
+ *      session) rather than duplicating its rendering logic here.
+ *   2. Sends a proportionate WhatsApp message — explicitly NOT using
+ *      "Graduate" or "Champion" language, since week 4 isn't one of the
+ *      defined 3/6/12-month milestones.
+ *   3. Marks "Week 4 Dashboard Sent" so this never re-fires for the same
+ *      subscriber. Requires that checkbox field to exist on Blueprint
+ *      Subscribers — see accompanying setup note.
+ * Never throws past its own boundary — a failure here should not stop
+ * the rest of the day's nudge run for other subscribers.
+ */
+async function sendWeek4Dashboard(apiKey, metaToken, { recordId, slug, name, to }) {
+  try {
+    const genRes = await fetch(`${SITE_URL}/.netlify/functions/forged-dashboard-generator?slug=${encodeURIComponent(slug)}`);
+    const genData = await genRes.json();
+    if (!genRes.ok || !genData.success) {
+      throw new Error(genData.error || `Generator returned ${genRes.status}`);
+    }
+
+    const link = `${SITE_URL}/dashboard/${slug}`;
+    const message = `🔥 *FORGED — Week 4 Check-In*\n\n${name}, four weeks in — here's where you stand:\n${link}\n\nThis reflects your baseline and everything you've engaged with so far. Keep showing up — the next chapter is still being written.`;
+
+    await sendWhatsApp(metaToken, to, message);
+
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${SUBSCRIBERS_TBL}/${recordId}`;
+    await fetch(url, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: { "Week 4 Dashboard Sent": true } })
+    });
+
+    console.log(`[FORGED] ✓ ${name} | Week 4 dashboard sent — ${link}`);
+    return true;
+  } catch (err) {
+    console.error(`[FORGED] ✗ ${name} — week 4 dashboard send failed: ${err.message}`);
+    return false;
+  }
+}
+
 async function sendWhatsApp(accessToken, to, message) {
   const url = `https://graph.facebook.com/v19.0/${PHONE_ID}/messages`;
   const res = await fetch(url, {
@@ -265,7 +360,7 @@ export default async function handler() {
 
     for (const record of subscribers) {
       const f      = record.fields;
-      const name   = f["Name"] || "Leader";
+      const name   = f["Name"] || f["Full Name"] || "Leader";
       const number = f["WhatsApp"] || "";
       const start  = f["Start Date"];
 
@@ -275,9 +370,26 @@ export default async function handler() {
         continue;
       }
 
+      // GAP FIX 1 — ensure every active subscriber has a slug, regardless
+      // of where they are in their cycle. No-op if one already exists.
+      const slug = await ensureDashboardSlug(AIRTABLE_KEY, record.id, f["Dashboard Slug"], name);
+
       const day = daysBetween(start);
 
-      if (day < 1 || day > 21) {
+      if (day < 1) {
+        console.log(`[FORGED] ${name} has not started yet (day ${day}) — skipping`);
+        skipped++;
+        continue;
+      }
+
+      if (day > 21) {
+        // GAP FIX 2 — narrow exception for the pilot's week-4 checkpoint.
+        // Does NOT resume daily nudges for day 22+ — that's still
+        // deferred to the full 12-month migration (Option B).
+        if (day === 28 && !f["Week 4 Dashboard Sent"]) {
+          const to = formatWhatsApp(number);
+          await sendWeek4Dashboard(AIRTABLE_KEY, META_TOKEN, { recordId: record.id, slug, name, to });
+        }
         console.log(`[FORGED] ${name} is on day ${day} — outside Blueprint window, skipping`);
         skipped++;
         continue;
